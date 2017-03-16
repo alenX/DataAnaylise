@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
-
+from views.index import vw_index
 app = Flask(__name__)
 
 
@@ -10,4 +10,5 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.register_blueprint(vw_index)
+    app.run(debug=True)
