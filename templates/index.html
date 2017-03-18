@@ -1,9 +1,21 @@
 <html>
 <head>
-
+<title>dd</title>
 </head>
+<script src="{{ url_for('static',filename='js/jquery-3.1.1.min.js') }}"></script>
+<script type="text/javascript">
+
+    $(document).ready(function(){
+        $('#collect').on('click',function(){
+            $.ajax({
+                url:'/collect_douban_book',
+                type:'POST'
+            });
+        });
+    });
+</script>
 <body>
 <label>来源:</label><select id="resource"><option value="douban_book" selected>豆瓣图书</option></select>
-<input type="button" value="开始搜集">
+<input type="button" value="开始搜集" id="collect">
 </body>
 </html>
