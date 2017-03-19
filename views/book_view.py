@@ -1,26 +1,15 @@
 # -*- coding: utf-8 -*-
 
 # 图书趋势分析
-from flask import Flask, Blueprint, render_template
+from flask import Flask, Blueprint, jsonify
 import requests
 from bs4 import BeautifulSoup
-import MySQLdb
-import time, re
+import datetime, re
+from models.books import douban_new_books
+from ext import db  as mysql_db
 
 vw_book = Blueprint('book', __name__, template_folder='templates')
-conn = MySQLdb.connect(
-    host='localhost',
-    port=3306,
-    user='root',
-    passwd='1128',
-    db='douban',
-)
-cur = conn.cursor()
 
-conn.set_character_set('utf8')
-cur.execute('SET NAMES utf8;')
-cur.execute('SET CHARACTER SET utf8;')
-cur.execute('SET character_set_connection=utf8;')
 # app = Flask(__name__)
 
 douban_url = 'https://book.douban.com/latest?icn=index-latestbook-all'  # 新书速递
@@ -35,17 +24,18 @@ def collect_douban_book():
         src = str(u.select_one('a > img')['src']).strip()
         score = str(u.select_one('div > p.rating > span.font-small.color-lightgray').text).strip()
         desc = str(u.select_one('div > p.color-gray').text).strip()
-        content = str(u.select_one('div > p.detail').text).strip()
-        print('------')
-        sql = "insert into dt_douban_new_books values(1,%s,%s,%s,%s,%s,%s,%s,%s)"
+        comment = str(u.select_one('div > p.detail').text).strip()
         if not re.findall(r'\d+', score):
             score = 0
-        cur.execute(sql,
-                    (title, '', desc, href, src, content, float(score),
-                     ''
-                     ))
-        conn.commit()
-    cur.close()
-    conn.commit()
-    conn.close()
-    return render_template('index.html')
+        dnb = douban_new_books()
+        dnb.href = href
+        dnb.author = (desc.split('/')[0]).strip().encode('utf-8')
+        dnb.title = title.encode('utf-8')
+        dnb.src = src.encode('utf-8')
+        dnb.score = score
+        dnb.comment = comment.encode('utf-8')
+        dnb.desc = desc.encode('utf-8')
+        dnb.batchdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        mysql_db.session.add(dnb)
+    mysql_db.session.commit()
+    return jsonify({'code': 1})
