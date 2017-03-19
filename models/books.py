@@ -10,6 +10,6 @@ class douban_new_books(mysql_db.Model):
     desc = mysql_db.Column(mysql_db.String(256))
     href = mysql_db.Column(mysql_db.String(256))
     src = mysql_db.Column(mysql_db.String(256))
-    comment = mysql_db.Column(mysql_db.BLOB)
+    comment = mysql_db.Column(mysql_db.String(512))
     score = mysql_db.Column(mysql_db.Float)
     batchdate = mysql_db.Column(mysql_db.String(32))
