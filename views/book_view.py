@@ -53,3 +53,12 @@ def collect_douban_book():
             mysql_db.session.add(dnb)
         mysql_db.session.commit()
     return jsonify({'code': 1})
+
+
+@vw_book.route('/query_books')
+def query_books_score():
+    first_book = douban_new_books.query.filter_by(score=0).all()
+    second_book = douban_new_books.query.filter(douban_new_books.score>0,douban_new_books.score <=4).all()
+    third_book = douban_new_books.query.filter(douban_new_books.score > 4 , douban_new_books.score <= 7).all()
+    fourth_book = douban_new_books.query.filter(douban_new_books.score > 7).all()
+    return jsonify({'data': [len(first_book), len(second_book), len(third_book), len(fourth_book)], 'categories': ['0', '1-4', '5-7', '8-10']})

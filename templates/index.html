@@ -1,21 +1,65 @@
 <html>
 <head>
-<title>dd</title>
+    <title>dd</title>
 </head>
 <script src="{{ url_for('static',filename='js/jquery-3.1.1.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/echarts/echarts.min.js') }}"></script>
 <script type="text/javascript">
 
-    $(document).ready(function(){
-        $('#collect').on('click',function(){
+    $(document).ready(function () {
+        $('#collect').on('click', function () {
             $.ajax({
-                url:'/collect_douban_book',
-                type:'POST'
+                url: '/collect_douban_book',
+                type: 'POST'
             });
         });
     });
 </script>
 <body>
-<label>来源:</label><select id="resource"><option value="douban_book" selected>豆瓣图书</option></select>
+<label>来源:</label><select id="resource">
+    <option value="douban_book" selected>豆瓣图书</option>
+</select>
 <input type="button" value="开始搜集" id="collect">
+
+<div id="score_chart" style="width: 400px;height: 300px"></div>
+
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('score_chart'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '图书得分'
+        },
+        tooltip: {},
+        legend: {
+            data: ['得分']
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: {},
+        series: [{
+            name: '得分',
+            type: 'bar',
+            data: []
+        }]
+    };
+    $.get('/query_books').done(function (data) {
+        // 填入数据
+        myChart.setOption({
+            xAxis: {
+                data: data.categories
+            },
+            series: [{
+                // 根据名字对应到相应的系列
+                name: '销量',
+                data: data.data
+            }]
+        });
+    });
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
 </body>
 </html>
