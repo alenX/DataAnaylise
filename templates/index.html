@@ -4,23 +4,34 @@
 </head>
 <script src="{{ url_for('static',filename='js/jquery-3.1.1.min.js') }}"></script>
 <script src="{{ url_for('static',filename='js/echarts/echarts.min.js') }}"></script>
-
+<script src="{{ url_for('static',filename='js/layui/layui.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static',filename='js/layui/css/layui.css') }}">
 <body>
-<label>来源:</label><select id="resource">
-    <option value="douban_book" selected>豆瓣图书</option>
-</select>
-<input type="button" value="开始搜集" id="collect">
-
-<div>
-    <label>批次:</label><select id="batchno">
-    {% for b in bts %}
-        <option value="{{ b }}">{{ b }}</option>
-    {% endfor %}
-</select>
-    <input type="button" value="查询" id="query_batch">
+<div style="margin-left: 20px;margin-top: 30px;">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">来源:</label>
+            <div class="layui-input-block" style="width: 160px;">
+                <select id="resource" title="大类">
+                    <option value="douban_book" selected>豆瓣图书</option>
+                </select>
+                <input type="button" value="开始搜集" id="collect" class="layui-btn">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">批次:</label>
+            <div class="layui-input-block" style="width: 160px;">
+                <select id="batchno" title="批次">
+                    {% for b in bts %}
+                        <option value="{{ b }}">{{ b }}</option>
+                    {% endfor %}
+                </select>
+                <input type="button" value="查询" id="query_batch" class="layui-btn">
+            </div>
+        </div>
+    </div>
+    <div id="score_chart" style="width: 400px;height: 300px"></div>
 </div>
-<div id="score_chart" style="width: 400px;height: 300px"></div>
-
 <script type="text/javascript">
     var myChart = echarts.init(document.getElementById('score_chart'));
 
@@ -48,58 +59,67 @@
 </script>
 <script type="text/javascript">
 
-    $(document).ready(function () {
-        $('#collect').on('click', function () {
-            $.ajax({
-                url: '/collect_douban_book',
-                type: 'POST',
-                success:function(data){
-                    if(data.code!=1){
-                       alert('无法采集'+data.content);
-                    }else{
-                        alert('采集结束');
-                    }
+    layui.use(['layer', 'form'], function () {
+        var layer = layui.layer
+                , form = layui.form();
 
-                }
+        $(document).ready(function () {
+            $('#collect').on('click', function () {
+                var index = layer.load(1, {
+                    shade: [0.1, '#fff'] //0.1透明度的白色背景
+                });
+                $.ajax({
+                    url: '/collect_douban_book',
+                    type: 'POST',
+                    success: function (data) {
+                        layer.close(index);
+                        if (data.code != 1) {
+                            layer.msg('无法采集' + data.content);
+                        } else {
+                            layer.msg('采集结束');
+                        }
+
+                    }
+                });
+            });
+
+            $('#query_batch').on('click', function () {
+                $.ajax({
+                    url: '/query_books/' + $('#batchno').val(),
+                    type: 'GET',
+                    success: function (data) {
+                        myChart.setOption({
+                            xAxis: {
+                                data: data.categories
+                            },
+                            series: [{
+                                // 根据名字对应到相应的系列
+                                name: '本',
+                                data: data.data
+                            }]
+                        });
+                    }
+                })
             });
         });
 
-        $('#query_batch').on('click', function () {
-            $.ajax({
-                url: '/query_books/'+$('#batchno').val(),
-                type: 'GET',
-                success: function (data) {
-                    myChart.setOption({
-                        xAxis: {
-                            data: data.categories
-                        },
-                        series: [{
-                            // 根据名字对应到相应的系列
-                            name: '本',
-                            data: data.data
-                        }]
-                    });
-                }
-            })
+        $.ajax({
+            url: '/query_books/' + $('#batchno').val(),
+            type: 'GET',
+            success: function (data) {
+                myChart.setOption({
+                    xAxis: {
+                        data: data.categories
+                    },
+                    series: [{
+                        // 根据名字对应到相应的系列
+                        name: '本',
+                        data: data.data
+                    }]
+                });
+            }
         });
     });
-
-    $.ajax({
-        url: '/query_books/'+$('#batchno').val(),
-        type: 'GET',
-        success: function (data) {
-            myChart.setOption({
-                xAxis: {
-                    data: data.categories
-                },
-                series: [{
-                    // 根据名字对应到相应的系列
-                    name: '本',
-                    data: data.data
-                }]
-            });
-        }
-    })
 </script>
 </body>
 </html>
