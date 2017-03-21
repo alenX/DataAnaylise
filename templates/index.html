@@ -4,23 +4,21 @@
 </head>
 <script src="{{ url_for('static',filename='js/jquery-3.1.1.min.js') }}"></script>
 <script src="{{ url_for('static',filename='js/echarts/echarts.min.js') }}"></script>
-<script type="text/javascript">
 
-    $(document).ready(function () {
-        $('#collect').on('click', function () {
-            $.ajax({
-                url: '/collect_douban_book',
-                type: 'POST'
-            });
-        });
-    });
-</script>
 <body>
 <label>来源:</label><select id="resource">
     <option value="douban_book" selected>豆瓣图书</option>
 </select>
 <input type="button" value="开始搜集" id="collect">
 
+<div>
+    <label>批次:</label><select id="batchno">
+    {% for b in bts %}
+        <option value="{{ b }}">{{ b }}</option>
+    {% endfor %}
+</select>
+    <input type="button" value="查询" id="query_batch">
+</div>
 <div id="score_chart" style="width: 400px;height: 300px"></div>
 
 <script type="text/javascript">
@@ -45,21 +43,63 @@
             data: []
         }]
     };
-    $.get('/query_books').done(function (data) {
-        // 填入数据
-        myChart.setOption({
-            xAxis: {
-                data: data.categories
-            },
-            series: [{
-                // 根据名字对应到相应的系列
-                name: '本',
-                data: data.data
-            }]
-        });
-    });
     // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
+</script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#collect').on('click', function () {
+            $.ajax({
+                url: '/collect_douban_book',
+                type: 'POST',
+                success:function(data){
+                    if(data.code!=1){
+                       alert('无法采集'+data.content);
+                    }else{
+                        alert('采集结束');
+                    }
+
+                }
+            });
+        });
+
+        $('#query_batch').on('click', function () {
+            $.ajax({
+                url: '/query_books/'+$('#batchno').val(),
+                type: 'GET',
+                success: function (data) {
+                    myChart.setOption({
+                        xAxis: {
+                            data: data.categories
+                        },
+                        series: [{
+                            // 根据名字对应到相应的系列
+                            name: '本',
+                            data: data.data
+                        }]
+                    });
+                }
+            })
+        });
+    });
+
+    $.ajax({
+        url: '/query_books/'+$('#batchno').val(),
+        type: 'GET',
+        success: function (data) {
+            myChart.setOption({
+                xAxis: {
+                    data: data.categories
+                },
+                series: [{
+                    // 根据名字对应到相应的系列
+                    name: '本',
+                    data: data.data
+                }]
+            });
+        }
+    })
 </script>
 </body>
 </html>

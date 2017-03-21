@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # 图书趋势分析
-from flask import Flask, Blueprint, jsonify
+from flask import Flask, Blueprint, jsonify, render_template
 import requests
 from bs4 import BeautifulSoup
 import datetime, re
 from models.books import douban_new_books
 from ext import db  as mysql_db
+from flask import request, json
 
 vw_book = Blueprint('book', __name__, template_folder='templates')
 
@@ -15,8 +16,18 @@ vw_book = Blueprint('book', __name__, template_folder='templates')
 douban_url = 'https://book.douban.com/latest?icn=index-latestbook-all'  # 新书速递
 
 
+@vw_book.route('/index')
+def index():
+    bt = [a[0] for a in mysql_db.session.query(douban_new_books.batchdate).distinct().all()]
+    return render_template('index.html', bts=bt)
+
+
 @vw_book.route('/collect_douban_book', methods=['POST'])
 def collect_douban_book():
+    today = datetime.datetime.now().strftime('%Y-%m-%d')
+    today_books = douban_new_books.query.filter_by(batchdate=today).all()
+    if len(today_books) > 0:
+        return jsonify({'code': 0, 'content': '当天批次已经采集！'})
     bs = BeautifulSoup(requests.get(douban_url).content, 'lxml')
     type = ['.article', '.aside']
     for tt in type:
@@ -49,16 +60,18 @@ def collect_douban_book():
             dnb.score = score
             dnb.comment = comment.encode('utf-8')
             dnb.desc = desc.encode('utf-8')
-            dnb.batchdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            dnb.batchdate = today
             mysql_db.session.add(dnb)
         mysql_db.session.commit()
     return jsonify({'code': 1})
 
 
-@vw_book.route('/query_books')
-def query_books_score():
-    first_book = douban_new_books.query.filter_by(score=0).all()
-    second_book = douban_new_books.query.filter(douban_new_books.score>0,douban_new_books.score <=4).all()
-    third_book = douban_new_books.query.filter(douban_new_books.score > 4 , douban_new_books.score <= 7).all()
-    fourth_book = douban_new_books.query.filter(douban_new_books.score > 7).all()
-    return jsonify({'data': [len(first_book), len(second_book), len(third_book), len(fourth_book)], 'categories': ['0', '1-4', '5-7', '8-10']})
+@vw_book.route('/query_books/<batchno>')
+def query_books_score(batchno):
+    all = douban_new_books.query.filter_by(batchdate=batchno)
+    first_book = all.filter_by(score=0).all()
+    second_book = all.filter(douban_new_books.score > 0, douban_new_books.score <= 4).all()
+    third_book = all.filter(douban_new_books.score > 4, douban_new_books.score <= 7).all()
+    fourth_book = all.filter(douban_new_books.score > 7).all()
+    return jsonify({'data': [len(first_book), len(second_book), len(third_book), len(fourth_book)],
+                    'categories': ['0', '1-4', '5-7', '8-10']})
