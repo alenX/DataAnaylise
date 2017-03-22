@@ -51,7 +51,10 @@
             </button>
         </div>#}
     </div>
-    <table id="tb_books"></table>
+    <div style="width: 80%;padding-left: 20px;;">
+      <table id="tb_books"></table>
+    </div>
+
 </div>
 <script type="text/javascript">
     var myChart = echarts.init(document.getElementById('score_chart'));
@@ -180,7 +183,7 @@
                         radio: true
                     }, {
                         field: 'id',
-                        title: 'id'
+                        title: '编号'
                     }, {
                         field: 'title',
                         title: '书名'
