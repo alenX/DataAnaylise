@@ -3,4 +3,3 @@ lxml==3.7.3
 Flask-SQLAlchemy==2.1
 beautifulsoup4==4.5.1
 SQLAlchemy==1.1.5
-jsonpickle==0.9.4
