@@ -13,3 +13,13 @@ class douban_new_books(mysql_db.Model):
     comment = mysql_db.Column(mysql_db.String(512))
     score = mysql_db.Column(mysql_db.Float)
     batchdate = mysql_db.Column(mysql_db.String(32))
+
+    def serialize(self):
+        return {
+            'title': self.title,
+            'author': self.author,
+            'desc': self.desc,
+            'comment': self.comment,
+            'score': self.score,
+            'batchdate': self.batchdate
+        }

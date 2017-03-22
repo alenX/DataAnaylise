@@ -75,3 +75,32 @@ def query_books_score(batchno):
     fourth_book = all.filter(douban_new_books.score > 7).all()
     return jsonify({'data': [len(first_book), len(second_book), len(third_book), len(fourth_book)],
                     'categories': ['0', '1-4', '5-7', '8-10']})
+
+
+@vw_book.route('/query_books/table')
+def query_books_table():
+    all_books = douban_new_books.query.filter_by(batchdate='2017-03-21').all()
+    return {'total': [e.serialize() for e in all_books]}
+
+
+def object2dict(obj):
+    # convert object to a dict
+    d = {}
+    d['__class__'] = obj.__class__.__name__
+    d['__module__'] = obj.__module__
+    d.update(obj.__dict__)
+    return d
+
+
+def dict2object(d):
+    # convert dict to object
+    if '__class__' in d:
+        class_name = d.pop('__class__')
+        module_name = d.pop('__module__')
+        module = __import__(module_name)
+        class_ = getattr(module, class_name)
+        args = dict((key.encode('ascii'), value) for key, value in d.items())  # get args
+        inst = class_(**args)  # create new instance
+    else:
+        inst = d
+    return inst
