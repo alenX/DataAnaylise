@@ -120,7 +120,8 @@
                             }]
                         });
                     }
-                })
+                });
+                $("#tb_books").bootstrapTable('refresh');
             });
 
 
@@ -159,8 +160,8 @@
                     pagination: true,                   //是否显示分页（*）
                     sortable: false,                     //是否启用排序
                     sortOrder: "asc",                   //排序方式
-                    {#                    queryParams: book_table_init.queryParams,//传递参数（*）#}
-                    sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+                    queryParams: oTableInit.queryParams,//传递参数（*）
+                    sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
                     pageNumber: 1,                       //初始化加载第一页，默认第一页
                     pageSize: 10,                       //每页的记录行数（*）
                     pageList: [5, 10, 20, 50],        //可供选择的每页的行数（*）
@@ -190,14 +191,14 @@
                         field: 'desc',
                         title: '图书明细'
                     }, {
-                        field: 'content',
+                        field: 'comment',
                         title: '简介'
                     }, {
                         field: 'score',
                         title: '评分'
                     }, {
                         field: 'batchdate',
-                        title: '采集日期',
+                        title: '采集日期'{#,
                         formatter: function (value, row, index) {
                             /*var time=value;
                              if(time==null){
@@ -209,23 +210,21 @@
                              }*/
                             var da = new Date(value);
                             return da.toLocaleDateString()
-                        }
+                        }#}
                     }]
                 });
             };
 
             //得到查询的参数
-            {#book_table_init.queryParams = function (params) {
+            oTableInit.queryParams = function (params) {
                 var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
                     limit: params.limit,   //页面大小
                     offset: params.offset,  //页码
-                    tx_id: 0,
-                    tx_apply_user_id: $("#tx_apply_user_id").val(),
-                    tx_apply_user_name: $("#tx_apply_user_name").val()
+                    batchdate: $('#batchno').val()
                 };
                 return temp;
             };
-            return book_table_init;#}
+
             return oTableInit;
         };
     });

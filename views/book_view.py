@@ -79,8 +79,17 @@ def query_books_score(batchno):
 
 @vw_book.route('/query_books/table')
 def query_books_table():
-    all_books = douban_new_books.query.filter_by(batchdate='2017-03-21').all()
-    return {'total': [e.serialize() for e in all_books]}
+    para = dict(request.args)
+    limit = para['limit'][0]
+    offset = para['offset'][0]
+    batchdate = para['batchdate'][0]
+    page = (int(offset) // int(limit))+1
+    all_books = douban_new_books.query.filter_by(batchdate=batchdate).paginate(page,
+                                                                                  per_page=int(limit),
+                                                                                  error_out=False).items
+    all_bks = douban_new_books.query.filter_by(batchdate=batchdate).all()
+    return jsonify({'rows': [f.seris() for f in all_books],
+                    'total': len(all_bks)})
 
 
 def object2dict(obj):
