@@ -109,7 +109,7 @@
 
             $('#query_batch').on('click', function () {
                 $.ajax({
-                    url: '/query_books/' + $('#batchno').val(),
+                    url: '/query_books_api/' + $('#batchno').val(),
                     type: 'GET',
                     success: function (data) {
                         myChart.setOption({

@@ -77,16 +77,36 @@ def query_books_score(batchno):
                     'categories': ['0', '1-4', '5-7', '8-10']})
 
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from config import SQLALCHEMY_DATABASE_URI
+from sqlalchemy import func
+@vw_book.route('/query_books_api/<batchno>')
+def query_books_score_api(batchno):
+    some_engine = create_engine(SQLALCHEMY_DATABASE_URI)
+    Session = sessionmaker(bind=some_engine)
+    session = Session()
+
+    rows = session.query(douban_new_books, func.count('*').label("books")).filter(douban_new_books.batchdate==batchno).group_by(douban_new_books.score).all()
+    data = []
+    categories = []
+    for r in rows:
+        data.append(r.books)
+        categories.append(r.douban_new_books.score)
+    return jsonify({'data': data,
+                    'categories': categories})
+
 @vw_book.route('/query_books/table')
 def query_books_table():
     para = dict(request.args)
     limit = para['limit'][0]
     offset = para['offset'][0]
     batchdate = para['batchdate'][0]
-    page = (int(offset) // int(limit))+1
+    page = (int(offset) // int(limit)) + 1
     all_books = douban_new_books.query.filter_by(batchdate=batchdate).paginate(page,
-                                                                                  per_page=int(limit),
-                                                                                  error_out=False).items
+                                                                               per_page=int(limit),
+                                                                               error_out=False).items
     all_bks = douban_new_books.query.filter_by(batchdate=batchdate).all()
     return jsonify({'rows': [f.seris() for f in all_books],
                     'total': len(all_bks)})
