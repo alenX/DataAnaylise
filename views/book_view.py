@@ -82,13 +82,16 @@ from sqlalchemy.orm import sessionmaker
 
 from config import SQLALCHEMY_DATABASE_URI
 from sqlalchemy import func
+
+
 @vw_book.route('/query_books_api/<batchno>')
 def query_books_score_api(batchno):
     some_engine = create_engine(SQLALCHEMY_DATABASE_URI)
     Session = sessionmaker(bind=some_engine)
     session = Session()
 
-    rows = session.query(douban_new_books, func.count('*').label("books")).filter(douban_new_books.batchdate==batchno).group_by(douban_new_books.score).all()
+    rows = session.query(douban_new_books, func.count('*').label("books")).filter(
+        douban_new_books.batchdate == batchno).group_by(douban_new_books.score).all()
     data = []
     categories = []
     for r in rows:
@@ -96,6 +99,7 @@ def query_books_score_api(batchno):
         categories.append(r.douban_new_books.score)
     return jsonify({'data': data,
                     'categories': categories})
+
 
 @vw_book.route('/query_books/table')
 def query_books_table():

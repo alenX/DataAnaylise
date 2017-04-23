@@ -52,7 +52,7 @@
         </div>#}
     </div>
     <div style="width: 80%;padding-left: 20px;;">
-      <table id="tb_books"></table>
+        <table id="tb_books"></table>
     </div>
 
 </div>
@@ -83,8 +83,9 @@
 </script>
 <script type="text/javascript">
 
-    layui.use(['layer'], function () {
-        var layer = layui.layer;
+    layui.use(['layer', 'form'], function () {
+        var layer = layui.layer, form = layui.form();
+        ;
 
         $(document).ready(function () {
             $('#collect').on('click', function () {
