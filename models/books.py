@@ -15,6 +15,6 @@ class douban_new_books(mysql_db.Model):
     batchdate = mysql_db.Column(mysql_db.String(32))
 
     def seris(self):
-        return {'id': self.id, 'title': self.title.decode('utf-8'), 'author': self.author.decode('utf-8'),
-                'desc': self.desc.decode('utf-8'), 'comment': self.comment.decode('utf-8'), 'score': self.score,
+        return {'id': self.id, 'title': self.title, 'author': self.author,
+                'desc': self.desc, 'comment': self.comment, 'score': self.score,
                 'batchdate': self.batchdate}

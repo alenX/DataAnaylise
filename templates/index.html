@@ -30,14 +30,16 @@
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">批次:</label>
-            <div class="layui-input-block" style="width: 160px;">
-                <select id="batchno" title="批次">
-                    {% for b in bts %}
-                        <option value="{{ b }}">{{ b }}</option>
-                    {% endfor %}
-                </select>
-                <input type="button" value="查询" id="query_batch" class="layui-btn">
-            </div>
+            {% if bts %}
+                <div class="layui-input-block" style="width: 160px;">
+                    <select id="batchno" title="批次">
+                        {% for b in bts %}
+                            <option value="{{ b }}">{{ b }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="button" value="查询" id="query_batch" class="layui-btn">
+                </div>
+            {% endif %}
         </div>
     </div>
     <div id="score_chart" style="width: 400px;height: 300px"></div>
