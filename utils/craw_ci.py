@@ -2,6 +2,7 @@
 # 采集诗词工具类
 
 from ext import db as mysql_db
+
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -13,8 +14,9 @@ class Ci(mysql_db.Model):  # 古诗词
     title = mysql_db.Column(mysql_db.String(256))
     author = mysql_db.Column(mysql_db.String(256))
     dynasty = mysql_db.Column(mysql_db.String(256))
-    content = mysql_db.Column(mysql_db.CLOB)
+    content = mysql_db.Column(mysql_db.BLOB)
     media = mysql_db.Column(mysql_db.String(256))
+
 
 def SpliderDetail(detail_url):
     if detail_url is None:
@@ -43,8 +45,17 @@ def SpliderDetail(detail_url):
         dynasty_rs = re_dy.group(0)[7:-4]
 
     if re_au:
-        author_rs = re_au.group(0)[0:-1]
-    print(title_rs + '--' + dynasty_rs.replace("\n","") + '--' + author_rs.replace("\n",""))
+        author_rs = re_au.group(0)[1:-1]
+
+    ci = Ci()
+    ci.title = title_rs.encode('utf-8')
+    ci.author = author_rs.encode('utf-8')
+    ci.dynasty = dynasty_rs.encode('utf-8')
+    ci.content = content.encode('utf-8')
+    ci.media=''
+    mysql_db.session.add(ci)
+    mysql_db.session.commit()
+    print(title_rs + '--' + dynasty_rs.replace("\n", "") + '--' + author_rs.replace("\n", ""))
 
 
 def CiSplider(ci_url='http://so.gushiwen.org/type.aspx?p=1'):
@@ -55,5 +66,4 @@ def CiSplider(ci_url='http://so.gushiwen.org/type.aspx?p=1'):
             SpliderDetail('http://so.gushiwen.org/' + m.group(0).split('/')[1])
 
 # if __name__ == '__main__':
-#     # mysql_db.create_all()
 #     CiSplider()

@@ -101,6 +101,16 @@ def query_books_score_api(batchno):
                     'categories': categories})
 
 
+from utils.craw_ci import CiSplider
+
+
+@vw_book.route('/crawl_ci')
+def crawl_ci():
+    for i in range(1, 10):
+        CiSplider('http://so.gushiwen.org/type.aspx?p=%s' % i)
+    return jsonify({"succ": 1})
+
+
 @vw_book.route('/query_books/table')
 def query_books_table():
     para = dict(request.args)
