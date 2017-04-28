@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config.from_object('config')
 mysql_db.init_app(app)
 with app.app_context():
-    mysql_db.drop_all()
+    # mysql_db.drop_all()
     mysql_db.create_all()
 
 

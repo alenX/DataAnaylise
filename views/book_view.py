@@ -101,14 +101,24 @@ def query_books_score_api(batchno):
                     'categories': categories})
 
 
-from utils.craw_ci import CiSplider
+from utils.craw_ci import CiSplider, headers
+from utils.download_proxy import down_load_proxy
+import random, threading
 
 
 @vw_book.route('/crawl_ci')
 def crawl_ci():
-    for i in range(1, 10):
-        CiSplider('http://so.gushiwen.org/type.aspx?p=%s' % i)
-    return jsonify({"succ": 1})
+    ll = down_load_proxy()
+    try:
+        for i in range(250, 450):
+            p = str(random.choice(ll))
+            print(p)
+            CiSplider(ci_url='http://so.gushiwen.org/type.aspx?p=%s' % i, proxy={p.split('=')[0]: p.split('=')[1]},
+                      header=headers)
+        return jsonify({"succ": 1})
+    except Exception as e:
+        print(e)
+        return jsonify({"succ": 0})
 
 
 @vw_book.route('/query_books/table')
